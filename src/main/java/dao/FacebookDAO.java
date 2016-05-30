@@ -741,77 +741,79 @@ public class FacebookDAO implements InterfaceFacebookDAO {
         PreparedStatement ps = null;
         ResultSet rs = null;
         Integer idSaved = null;
-            try {
-                String SQL = "INSERT INTO albumcomment (idAlbum, idUser, content) VALUES (?, ?, ?)";
-                ps = conexao.prepareStatement(SQL);
-                ps.setInt(1, a.getId());
-                ps.setInt(2, comment.getCommentator().getId());
-                ps.setString(3, comment.getContent());
-                ps.executeUpdate();
-                rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    idSaved = rs.getInt(1);
-                }   
-            } catch (SQLException ex) {
-                throw new FacebookDAOException("Impossível fazer comentário em Álbum!", ex);
-            } finally{
-                ConnectionFactory.closeConnection(conexao, ps, rs);
+        try {
+            String SQL = "INSERT INTO albumcomment (idAlbum, idUser, content) VALUES (?, ?, ?)";
+            ps = conexao.prepareStatement(SQL);
+            ps.setInt(1, a.getId());
+            ps.setInt(2, comment.getCommentator().getId());
+            ps.setString(3, comment.getContent());
+            ps.executeUpdate();
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                idSaved = rs.getInt(1);
             }
-        
+        } catch (SQLException ex) {
+            throw new FacebookDAOException("Impossível fazer comentário em Álbum!", ex);
+        } finally {
+            ConnectionFactory.closeConnection(conexao, ps, rs);
+        }
+
         return idSaved;
     }
+
     @Override
     public Integer saveComment(Comment comment, Photo photo) throws FacebookDAOException {
         Connection conexao = geraConexao();
         PreparedStatement ps = null;
         ResultSet rs = null;
         Integer idSaved = null;
-            try {
-                String SQL = "INSERT INTO photocomment (idUser, idPhoto, content) VALUES (?, ?, ?)";
-                ps = conexao.prepareStatement(SQL);
-                ps.setInt(1, comment.getCommentator().getId());
-                ps.setInt(2, photo.getId());
-                ps.setString(3, comment.getContent());
-                ps.executeUpdate();
-                rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    idSaved = rs.getInt(1);
-                }
-            } catch (SQLException ex) {
-                throw new FacebookDAOException("Impossível fazer comentário em Foto!", ex);
-            }finally{
-                ConnectionFactory.closeConnection(conexao, ps, rs);
+        try {
+            String SQL = "INSERT INTO photocomment (idUser, idPhoto, content) VALUES (?, ?, ?)";
+            ps = conexao.prepareStatement(SQL);
+            ps.setInt(1, comment.getCommentator().getId());
+            ps.setInt(2, photo.getId());
+            ps.setString(3, comment.getContent());
+            ps.executeUpdate();
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                idSaved = rs.getInt(1);
             }
+        } catch (SQLException ex) {
+            throw new FacebookDAOException("Impossível fazer comentário em Foto!", ex);
+        } finally {
+            ConnectionFactory.closeConnection(conexao, ps, rs);
+        }
         return idSaved;
     }
+
     @Override
     public Integer saveComment(Comment comment, Post p) throws FacebookDAOException {
         Connection conexao = geraConexao();
         PreparedStatement ps = null;
         ResultSet rs = null;
         Integer idSaved = null;
-         try {
-                String SQL = "INSERT INTO postcomment (idCommentatorUser, idPost, content) VALUES (?, ?, ?)";
-                ps = conexao.prepareStatement(SQL,Statement.RETURN_GENERATED_KEYS);
-                ps.setInt(1, comment.getCommentator().getId());
-                ps.setInt(2, p.getId());
-                ps.setString(3, comment.getContent());
-                //System.out.println("COM:"+comment.getCommentator().getId()+" - "+p.getId()+" - "+comment.getContent());
-                //System.out.println("COM2:"+comment.getCommentator().getId()+" - "+p.getId()+" - "+comment.getContent());
-                ps.executeUpdate();
-                rs = ps.getGeneratedKeys();
-                //System.out.println("COM3:"+comment.getCommentator().getId()+" - "+p.getId()+" - "+comment.getContent());
-                
-                if (rs.next()) {
-                    idSaved = rs.getInt(1);
-                }
-            } catch (Exception ex) {
-                //ex.printStackTrace();
-                throw new FacebookDAOException("Impossível fazer comentário em Post!", ex);
-            }finally{
-                ConnectionFactory.closeConnection(conexao, ps, rs);
+        try {
+            String SQL = "INSERT INTO postcomment (idCommentatorUser, idPost, content) VALUES (?, ?, ?)";
+            ps = conexao.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, comment.getCommentator().getId());
+            ps.setInt(2, p.getId());
+            ps.setString(3, comment.getContent());
+            //System.out.println("COM:"+comment.getCommentator().getId()+" - "+p.getId()+" - "+comment.getContent());
+            //System.out.println("COM2:"+comment.getCommentator().getId()+" - "+p.getId()+" - "+comment.getContent());
+            ps.executeUpdate();
+            rs = ps.getGeneratedKeys();
+            //System.out.println("COM3:"+comment.getCommentator().getId()+" - "+p.getId()+" - "+comment.getContent());
+
+            if (rs.next()) {
+                idSaved = rs.getInt(1);
             }
-        
+        } catch (Exception ex) {
+            //ex.printStackTrace();
+            throw new FacebookDAOException("Impossível fazer comentário em Post!", ex);
+        } finally {
+            ConnectionFactory.closeConnection(conexao, ps, rs);
+        }
+
         return idSaved;
     }
 
@@ -1308,8 +1310,8 @@ public class FacebookDAO implements InterfaceFacebookDAO {
                 listPost.add(post);
             }
             pstm.close();
-        } catch (FacebookDAOException | SQLException e) {
-            throw new FacebookDAOException(e.getMessage());
+        } catch (SQLException e) {
+            throw new FacebookDAOException("Impossível buscar posts do usuário " + user.getId() + ".", e);
         }
         return listPost;
     }
