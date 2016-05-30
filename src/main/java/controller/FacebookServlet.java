@@ -27,6 +27,7 @@ import model.Album;
 import model.Comment;
 import model.Photo;
 import model.Post;
+import model.PostComment;
 import model.User;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -49,7 +50,7 @@ public class FacebookServlet extends HttpServlet {
         if (!request.getContentType().startsWith("multipart/form-data")) {
             return false;
         }
-        String diretorio = getServletContext().getRealPath("/")+"files";
+        String diretorio = getServletContext().getRealPath("/") + "files";
         System.out.println("DIRETORIO:" + diretorio);
         String filename = "file";
         String path = diretorio;
@@ -94,17 +95,20 @@ public class FacebookServlet extends HttpServlet {
         private static final Pattern regexUserId = Pattern.compile("/users/([0-9]*)");
         private static final Pattern regexUserName = Pattern.compile("/user/name/([a-zA-Z 0-9]*)");
         private static final Pattern regexUserFriends = Pattern.compile("/users/([0-9]*)/friends");
+        private static final Pattern regexPostsOfFriends = Pattern.compile("/users/([0-9]*)/friends/posts");
         private static final Pattern regexPostsOfUser = Pattern.compile("/users/([0-9]*)/posts");
         private static final Pattern regexPhotosOfUser = Pattern.compile("/users/([0-9]*)/photos");
         private static final Pattern regexAlbunsOfUserId = Pattern.compile("/users/([0-9]*)/albuns");
         private static final Pattern regexPostIdComments = Pattern.compile("/posts/([0-9]*)/comments");
         private static final Pattern regexUserLikesPost = Pattern.compile("/likes");
         private static final Pattern regexLikesOfPost = Pattern.compile("/posts/([0-9]*)/likes");
-        
-        private static final Pattern regexLogin = Pattern.compile("/login");
-        private static final Pattern regexPostPhoto = Pattern.compile("/postPhoto");
+        private static final Pattern regexCountLikesOfPost = Pattern.compile("/posts/([0-9]*)/likes/count");
 
-        
+        private static final Pattern regexStartFriendship = Pattern.compile("/users/friends");
+        private static final Pattern regexLogin = Pattern.compile("/login");
+        private static final Pattern regexPostPhoto = Pattern.compile("/photos");
+        private static final Pattern regexPostComment = Pattern.compile("/comments");
+
         public static Integer MatchPostIdComments(String requestUri) throws ServletException {
             Matcher matcher = regexPostIdComments.matcher(requestUri);
             System.out.println(matcher);
@@ -120,6 +124,23 @@ public class FacebookServlet extends HttpServlet {
             }
             return null;
         }
+        
+        public static Integer MatchCountLikesOfPost(String requestUri) throws ServletException {
+            Matcher matcher = regexCountLikesOfPost.matcher(requestUri);
+            System.out.println(matcher);
+            if (matcher.find() && matcher.groupCount() > 0) {
+                System.out.println("COUNT LIKES OF POST - END:" + matcher.end() + " -- REQ:" + (requestUri.length()));
+                if (matcher.end() == requestUri.length()) {
+                    String s = matcher.group(1);
+                    if (s != null && s.trim().length() > 0) {
+                        int id = Integer.parseInt(s);
+                        return id;
+                    }
+                }
+            }
+            return null;
+        }
+        
         public static Integer MatchLikesOfPost(String requestUri) throws ServletException {
             Matcher matcher = regexLikesOfPost.matcher(requestUri);
             System.out.println(matcher);
@@ -229,6 +250,22 @@ public class FacebookServlet extends HttpServlet {
             return null;
         }
 
+        public static Integer MatchPostsOfFriends(String requestUri) throws ServletException {
+            Matcher matcher = regexPostsOfFriends.matcher(requestUri);
+            if (matcher.find() && matcher.groupCount() > 0) {
+                if (matcher.end() == requestUri.length()) {
+                    System.out.println("POSTS OF FRIENDS - END:" + matcher.end() + " -- REQ:" + (requestUri.length()));
+                    String posts = matcher.group(1);
+                    if (posts != null && posts.trim().length() > 0) {
+                        Integer n = Integer.valueOf(posts);
+                        return n;
+                    }
+                }
+
+            }
+            return null;
+        }
+
         public static Integer MatchUserFriends(String requestUri) throws ServletException {
             Matcher matcher = regexUserFriends.matcher(requestUri);
             if (matcher.find() && matcher.groupCount() > 0) {
@@ -261,8 +298,11 @@ public class FacebookServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         System.out.println("GET GET!!!!!!!!!!!!!!");
-        Integer offset = Integer.valueOf(request.getParameter("offset"));
-        Integer limit = Integer.valueOf(request.getParameter("limit"));
+        Integer offset=0, limit=Integer.MAX_VALUE;
+        if(request.getParameterMap().containsKey("offset"))
+        offset = Integer.valueOf(request.getParameter("offset"));
+        if(request.getParameterMap().containsKey("limit"))
+        limit = Integer.valueOf(request.getParameter("limit"));
         System.out.println(offset + "   &&&   " + limit);
         String servletAddress = "http://" + request.getServerName() + ":" + request.getServerPort() + "/WebServiceFacebook/";
         String requestUri = request.getRequestURI();
@@ -272,12 +312,14 @@ public class FacebookServlet extends HttpServlet {
         String userName = RegexUtil.MatchName(requestUri);
         Integer idUserFriends = RegexUtil.MatchUserFriends(requestUri);
         Integer idUserPosts = RegexUtil.MatchPostsOfUser(requestUri);
+        Integer idUserPostsOfFriends = RegexUtil.MatchPostsOfFriends(requestUri);
         Integer idUserAlbuns = RegexUtil.MatchAlbunsOfUserId(requestUri);
         Integer idUserPhotos = RegexUtil.MatchPhotosOfUserId(requestUri);
         Integer idPostComments = RegexUtil.MatchPostIdComments(requestUri);
         Integer idLikesOfPost = RegexUtil.MatchLikesOfPost(requestUri);
-
-        System.out.println("UserId:" + idUser + " -- userName:" + userName + " -- friendOfUser:" + idUserFriends + " -- userOfPost:" + userName + " -- userOfPost:" + idUserPosts + " -- idUserAlbuns:" + idUserAlbuns + " -- idUserPhotos:" + idUserPhotos+" -- idPostComments:"+idPostComments);
+        Integer idPostCountLikes = RegexUtil.MatchCountLikesOfPost(requestUri);
+        
+        System.out.println("idPostsOfFriends:" + idUserPostsOfFriends + " -- UserId:" + idUser + " -- userName:" + userName + " -- friendOfUser:" + idUserFriends + " -- userOfPost:" + userName + " -- userOfPost:" + idUserPosts + " -- idUserAlbuns:" + idUserAlbuns + " -- idUserPhotos:" + idUserPhotos + " -- idPostComments:" + idPostComments);
         System.out.println("Friends of user:" + idUserFriends);
         if (idUser != null) {
             try {
@@ -328,6 +370,16 @@ public class FacebookServlet extends HttpServlet {
             } catch (FacebookDAOException ex) {
                 throw new ServletException("Impossível encontrar os posts do usuário de id = " + idUserPosts + "!", ex);
             }
+        } else if (idUserPostsOfFriends != null) {
+            List<Post> posts;
+            try {
+                posts = dao.getAllFriendsPostsOfUser(new User(idUserPostsOfFriends), offset, limit);
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String json = gson.toJson(posts);
+                ServletUtil.writeJSON(response, json);
+            } catch (FacebookDAOException ex) {
+                Logger.getLogger(FacebookServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } else if (idUserAlbuns != null) {
             try {
                 User u = new User(idUserAlbuns);
@@ -362,19 +414,28 @@ public class FacebookServlet extends HttpServlet {
             } catch (FacebookDAOException ex) {
                 throw new ServletException("Impossível encontrar comentários para o post de id = " + idPostComments + "!", ex);
             }
-        }else if (idLikesOfPost != null) {
-           List<User> users=null;
+        } else if (idLikesOfPost != null) {
+            List<User> users = null;
             try {
                 users = dao.getListOfLikesPost(new Post(idLikesOfPost), offset, limit);
-            
+
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 String json = gson.toJson(users);
                 ServletUtil.writeJSON(response, json);
-            
-        } catch (FacebookDAOException ex) {
+
+            } catch (FacebookDAOException ex) {
                 Logger.getLogger(FacebookServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
+        } else if (idPostCountLikes != null) {
+            try {
+                Integer number = dao.getNumberOfLikesPost(new Post(idPostCountLikes));
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String json = gson.toJson(number);
+                ServletUtil.writeJSON(response, json);
+            } catch (FacebookDAOException ex) {
+                Logger.getLogger(FacebookServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
 
 //processRequest(request, response);
     }
@@ -425,7 +486,7 @@ public class FacebookServlet extends HttpServlet {
             //EXEMPLO: http://localhost:8080/WebServiceFacebook/facebook/likes?user=1&post=2
             User u = new User(Integer.valueOf(request.getParameter("user")));
             Post p = new Post(Integer.valueOf(request.getParameter("post")));
-            System.out.println("Like:"+u+"--"+p);
+            System.out.println("Like:" + u + "--" + p);
             FacebookDAO dao = new FacebookDAO(servletAddress);
             try {
                 dao.addLikeInPost(u, p);
@@ -435,6 +496,39 @@ public class FacebookServlet extends HttpServlet {
                 //ServletUtil.writeJSON(response, json);
             } catch (FacebookDAOException ex) {
                 System.out.println("Erro login!" + ex.getMessage());;
+            }
+            System.out.println("POST LOGIN!");
+        } else if (RegexUtil.regexStartFriendship.matcher(requestUri).find()) {
+            //EXEMPLO: http://localhost:8080/WebServiceFacebook/facebook/likes?user=1&post=2
+            User u1 = new User(Integer.valueOf(request.getParameter("user1")));
+            User u2 = new User(Integer.valueOf(request.getParameter("user2")));
+            FacebookDAO dao = new FacebookDAO(servletAddress);
+            try {
+                dao.saveFriendship(u1, u2);
+                dao.saveFriendship(u2, u1);
+                response.getWriter().write("FRIENDS");
+                //Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                //String json = gson.toJson(u);
+                //ServletUtil.writeJSON(response, json);
+            } catch (FacebookDAOException ex) {
+                System.out.println("Erro login!" + ex.getMessage());;
+            }
+            System.out.println("POST LOGIN!");
+        }else if (RegexUtil.regexPostComment.matcher(requestUri).find()) {
+            //EXEMPLO: http://localhost:8080/WebServiceFacebook/facebook/likes?user=1&post=2
+            String content = request.getParameter("content");
+            User u = new User(Integer.valueOf(request.getParameter("user")));
+            Post p = new Post(Integer.valueOf(request.getParameter("post")));
+            Comment c = new Comment(u,content);
+            System.out.println("PostComment:" + c);
+            FacebookDAO dao = new FacebookDAO(servletAddress);
+            try {
+                int idPost = dao.saveComment(c,p);
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String json = gson.toJson(idPost);
+                ServletUtil.writeJSON(response, json);
+            } catch (FacebookDAOException ex) {
+                System.out.println("Impossível salvar post!" + ex.getMessage());;
             }
             System.out.println("POST LOGIN!");
         }

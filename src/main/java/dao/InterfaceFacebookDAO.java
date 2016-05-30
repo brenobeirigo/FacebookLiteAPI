@@ -34,7 +34,7 @@ public interface InterfaceFacebookDAO {
     //9 - Retorna fotos curtidas pelo usuário (mais recente primeiro)  
     List<Photo> getLikedPhotosOfUser(User user, int offset, int limit) throws FacebookDAOException;
     //10 - Retorna postagens dos amigos de um usuário (mais recente primeiro)  
-    List<Post> getAllFriendsPostsOfUser(User user) throws FacebookDAOException;
+    List<Post> getAllFriendsPostsOfUser(User user, int offset, int limit) throws FacebookDAOException;
     
     /***** ALBUM **************************************************************/
     //11 - Cadastra álbum
@@ -80,8 +80,12 @@ public interface InterfaceFacebookDAO {
     /***** COMMENT ************************************************************/
     //DICA: Verificar o tipo do comentário dentro dos métodos (instanceof)
     //para decidir em qual tabela de comentários salvar (PostComment, PhotoComment, AlbumComment)
-    //27 - Cadastra comentário
-    void saveComment(Comment comment) throws FacebookDAOException;
+    //27A - Cadastra comentário em album
+    Integer saveComment(Comment comment, Album album) throws FacebookDAOException;
+    //27B - Cadastra comentário em photo
+    Integer saveComment(Comment comment, Photo photo) throws FacebookDAOException;
+    //27C - Cadastra comentário em post
+    Integer saveComment(Comment comment, Post post) throws FacebookDAOException;
     //28 - Apaga comentário
     void removeComment(Comment comment) throws FacebookDAOException;
     //29 - Atualiza dados do comentário (id não é atualizado)
@@ -104,7 +108,7 @@ public interface InterfaceFacebookDAO {
     
     /***** POST ***************************************************************/
     //37 - Cadastra postagem
-    void savePost(Post post) throws FacebookDAOException;
+    Integer savePost(Post post) throws FacebookDAOException;
     //38 - Apaga postagem
     void removePost(Post post) throws FacebookDAOException;
     //39 - Atualiza dados da postagem (id não é atualizado)
@@ -121,5 +125,7 @@ public interface InterfaceFacebookDAO {
     //Note que é possível criar objetos apenas com o atributo id
     List<User> getListOfLikesPost(Post post, int offset, int limit) throws FacebookDAOException;
     //45 - Number of likes
-    List<User> getNumberOfLikesPost(Post post) throws FacebookDAOException;
+    Integer getNumberOfLikesPost(Post post) throws FacebookDAOException;
+    //46 - Start Friendship
+    public void saveFriendship(User user1, User user2) throws FacebookDAOException; 
 }

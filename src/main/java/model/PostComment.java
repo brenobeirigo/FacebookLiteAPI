@@ -14,9 +14,21 @@ import java.util.List;
  */
 public class PostComment extends Comment{
     private Post post;
+
+    public PostComment(Post post, User commentator, String content) {
+        super(commentator, content);
+        this.post = post;
+    }
+    
+    
     public PostComment(int id, String content, User commentator, Calendar timestamp, Post post) {
         super(id, content, commentator, timestamp);
         this.post = post;
+    }
+
+    @Override
+    public String toString() {
+        return "PostComment{" +super.toString()+ "post=" + post + '}';
     }
     
 }

@@ -25,6 +25,11 @@ public class Comment {
         this.timeComment = timestamp;
     }
     
+    public Comment(User commentator, String content) {
+        this.content = content;
+        this.commentator = commentator;
+    }
+    
     public int getId() {
         return id;
     }
@@ -55,6 +60,11 @@ public class Comment {
 
     public void setTimeComment(Calendar timeComment) {
         this.timeComment = timeComment;
+    }
+
+    @Override
+    public String toString() {
+        return "Comment{" + "id=" + id + ", content=" + content + ", commentator=" + commentator + ", timeComment=" + timeComment + '}';
     }
     
     

@@ -12,13 +12,18 @@ import java.util.List;
  *
  * @author BBEIRIGO
  */
-public class Post {
+public class Post implements Comparable<Post>{
     private int id;
     private User author;
     private String content;
     private Calendar timestamp;
 
-    public Post(User author, String content) {
+    /**
+     *
+     * @param author
+     * @param content
+     */
+    public Post(User author, String content){
         this.author = author;
         this.content = content;
     }
@@ -64,4 +69,16 @@ public class Post {
     public void setTimestamp(Calendar timestamp) {
         this.timestamp = timestamp;
     }    
+
+    @Override
+    public int compareTo(Post o) {
+        return this.timestamp.compareTo(o.getTimestamp());
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" + "id=" + id + ", author=" + author + ", content=" + content + ", timestamp=" + timestamp + '}';
+    }
+    
+    
 }
