@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Start Page</title>
+        <title>Upload</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     </head>
     <body>
         
-        <h1>Hello World!</h1>
-        <form method="post" action="facebook/photos" enctype="multipart/form-data">
-            Arquivo: <input type="file" name="profile_encoded" />
-            Arquivo: <input type="file" name="cover" />
-            Texto: <input type="text" name="name"/>
+        <h1>Upload de arquivos</h1>
+        <form method="post" action="facebook/register" enctype="multipart/form-data">
+            Foto de perfil: <input type="file" name="profile" /> <br>
+            Nome do usuário: <input type="text" name="name"/> <br>
             <input type="submit" name="submit" value="Enviar"/>
         </form>
     </body>

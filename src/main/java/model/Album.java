@@ -16,6 +16,14 @@ public class Album {
         this.name = name;
         this.date = date;
     }
+    
+    public Album(String name) {
+        this.name = name;
+    }
+
+    public Album(int id) {
+        this.id = id;
+    }
 
     public int getId() {
         return id;

@@ -37,6 +37,13 @@ public class User {
         this.profilePhoto = profilePhoto;
         this.coverPhoto = coverPhoto;
     }
+
+    public User(String name, String email, Calendar dateOfBirth) {
+        this.name = name;
+        this.email = email;
+        this.dateOfBirth = dateOfBirth;
+    }
+        
     
     public User(int id, String name, Photo profilePhoto) {
         this.id = id;

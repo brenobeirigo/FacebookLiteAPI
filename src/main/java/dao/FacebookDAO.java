@@ -5,6 +5,8 @@
  */
 package dao;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,22 +60,33 @@ public class FacebookDAO implements InterfaceFacebookDAO {
         this.password = "123456";
         this.servletAddress = servletAddress;
     }
+    
+    public FacebookDAO() {
+        this.server = "localhost";
+        this.port = "3306";
+        this.db = "facebookdb";
+        this.user = "root";
+        this.password = "123456";
+    }
 
     @Override
-    public void saveUser(User user) throws FacebookDAOException {
+    public User saveUser(User user, String password) throws FacebookDAOException {
         PreparedStatement ps = null;
+        ResultSet rs = null;
         Connection conn = null;
+        Integer idSaved = null;
+        User u = null;
         if (user == null) {
             throw new FacebookDAOException("O valor passado não pode ser nulo.");
         }
 
         try {
-            String SQL = "INSERT INTO `facebookdb`.`user` (`name`, `email`, `birthDate`) VALUES (?, ?, ?);";
+            String SQL = "INSERT INTO `facebookdb`.`user` (`name`, `email`, `birthDate`, `password`) VALUES (?, ?, ?, ?);";
             conn = geraConexao();
-            ps = conn.prepareStatement(SQL);
+            ps = conn.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail());
-
+            
             //Caso seja necessário trabalhar com datas ou timestamps utilizar setDate e setTime em conjunto com o Calendar. Exemplo:
             //Cria objeto calendar
             Calendar c = Calendar.getInstance();
@@ -82,12 +95,39 @@ public class FacebookDAO implements InterfaceFacebookDAO {
             c = user.getDateOfBirth();
             //Altera statement
             ps.setDate(3, new java.sql.Date(c.getTimeInMillis()));
+            ps.setString(4, password);
+            
             ps.executeUpdate();
+            
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                idSaved = rs.getInt(1);
+            }
+            int idAlbumCover = saveAlbum(new Album("Cover"),new User(idSaved));
+            int idPhotoCover = savePhoto(new Photo("photos/"+idSaved+"/Cover/photo_"+System.nanoTime()+".jpg"), new Album(idAlbumCover));
+            
+            int idAlbumProfile = saveAlbum(new Album("Profile"),new User(idSaved));
+            int idPhotoProfile = savePhoto(new Photo("photos/"+idSaved+"/Profile/photo_"+System.nanoTime()+".jpg"), new Album(idAlbumProfile));
+            
+            String updateSQL = "UPDATE `facebookdb`.`user` SET `profilePhoto`=?, `coverPhoto`=? WHERE `idUser`=?";
+            conn = geraConexao();
+            ps = conn.prepareStatement(updateSQL,Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, idPhotoProfile);
+            ps.setInt(2, idPhotoCover);
+            ps.setInt(3,idSaved);
+            ps.executeUpdate();
+            
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                idSaved = rs.getInt(1);
+            }
+            u = getUserById(idSaved);
         } catch (SQLException sqle) {
             throw new FacebookDAOException("Erro ao inserir dados: \"" + user.getName() + "\", \"" + user.getEmail() + "\".", sqle);
-        } finally {
+        }  finally {
             ConnectionFactory.closeConnection(conn, ps);
         }
+        return u;
 
     }
 
@@ -425,22 +465,28 @@ public class FacebookDAO implements InterfaceFacebookDAO {
     }
 
     @Override
-    public void saveAlbum(Album album, User user) throws FacebookDAOException {
+    public Integer saveAlbum(Album album, User user) throws FacebookDAOException {
         ResultSet rs = null;//Apenas existe para a função 
         PreparedStatement ps = null;
         Connection conn = null;
-        conn = ConnectionFactory.getConnection("localhost", "3306", "facebookdb", "root", "123456");
+        Integer idSaved = null;
+        conn = geraConexao();
         try {
-            ps = conn.prepareStatement("INSERT INTO `facebookdb`.`album` (`idUser`, `name`) VALUES ('?', '?')");
+            ps = conn.prepareStatement("INSERT INTO `facebookdb`.`album` (`idUser`, `name`) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, user.getId());
             ps.setString(2, album.getName());
-            ps.executeQuery();
+            ps.executeUpdate();
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                idSaved = rs.getInt(1);
+            }
         } catch (SQLException sqle) {
-            throw new FacebookDAOException(sqle);
+            throw new FacebookDAOException("ERro em saveAlubm",sqle);
         } finally {
             ConnectionFactory.closeConnection(conn, ps, rs);
 
         }
+        return idSaved;
     }
 
     @Override
@@ -625,9 +671,11 @@ public class FacebookDAO implements InterfaceFacebookDAO {
     }
 
     @Override
-    public void savePhoto(Photo photo, Album album) throws FacebookDAOException {
+    public Integer savePhoto(Photo photo, Album album) throws FacebookDAOException {
         PreparedStatement ps = null;
         Connection conn = null;
+        ResultSet rs = null;
+        Integer idSaved=0;
         if (photo == null) {
             throw new FacebookDAOException("O valor passado não pode ser nulo.");
         }
@@ -635,18 +683,23 @@ public class FacebookDAO implements InterfaceFacebookDAO {
         try {
             conn = geraConexao();
             String SQL = " INSERT INTO photo (idAlbum,path) VALUES (?,?);";
-            ps = conn.prepareStatement(SQL);
+            ps = conn.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             //Obtendo o Album que ira ser salvo a foto;
             ps.setObject(1, album.getId());
             //Obtendo o caminho da foto;
             ps.setString(2, photo.getPath());
             //Executando
             ps.executeUpdate();
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                idSaved = rs.getInt(1);
+            }
         } catch (SQLException sqle) {
             throw new FacebookDAOException("Erro ao inserir dados: Caminho da foto: \"" + photo.getPath() + "\"", sqle);
         } finally {
             ConnectionFactory.closeConnection(conn, ps);
         }
+        return idSaved;
     }
 
     @Override
@@ -743,7 +796,7 @@ public class FacebookDAO implements InterfaceFacebookDAO {
         Integer idSaved = null;
         try {
             String SQL = "INSERT INTO albumcomment (idAlbum, idUser, content) VALUES (?, ?, ?)";
-            ps = conexao.prepareStatement(SQL);
+            ps = conexao.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, a.getId());
             ps.setInt(2, comment.getCommentator().getId());
             ps.setString(3, comment.getContent());
@@ -769,7 +822,7 @@ public class FacebookDAO implements InterfaceFacebookDAO {
         Integer idSaved = null;
         try {
             String SQL = "INSERT INTO photocomment (idUser, idPhoto, content) VALUES (?, ?, ?)";
-            ps = conexao.prepareStatement(SQL);
+            ps = conexao.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, comment.getCommentator().getId());
             ps.setInt(2, photo.getId());
             ps.setString(3, comment.getContent());
@@ -1305,7 +1358,8 @@ public class FacebookDAO implements InterfaceFacebookDAO {
             while (rs.next()) {
                 Calendar creation = Calendar.getInstance();
                 creation.setTimeInMillis(rs.getTimestamp("creationTime").getTime());
-                Photo photo = new Photo(user.getProfilePhoto().getId(), user.getProfilePhoto().getPath());
+                User u = getUserById(user.getId());
+                Photo photo = new Photo(u.getProfilePhoto().getId(), u.getProfilePhoto().getPath());
                 Post post = new Post(rs.getInt("idPost"), new User(user.getId(), user.getName(), photo), rs.getString("content"), creation);
                 listPost.add(post);
             }
@@ -1374,8 +1428,10 @@ public class FacebookDAO implements InterfaceFacebookDAO {
         PreparedStatement pstm = null;
         ResultSet rs = null;
         try {
-            pstm = conn.prepareStatement("select * from user_likes_post where idPost = ?");
+            pstm = conn.prepareStatement("select * from user_likes_post where idPost = ? LIMIT ?,?");
             pstm.setInt(1, post.getId());
+            pstm.setInt(2, offset);
+            pstm.setInt(3, limit);
             rs = pstm.executeQuery();
             while (rs.next()) {
                 User u = getUserById(rs.getInt("idUser"));

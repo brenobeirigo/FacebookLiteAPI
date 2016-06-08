@@ -16,7 +16,7 @@ public interface InterfaceFacebookDAO {
     //0 - Check user
     User login(String email, String password) throws FacebookDAOException;
     //1 - Cadastra usuário
-    void saveUser(User user) throws FacebookDAOException;
+    User saveUser(User user, String password) throws FacebookDAOException;
     //2 - Apaga usuário user
     void removeUser(User user) throws FacebookDAOException;
     //3 - Atualiza dados do usuário user (id não é atualizado)
@@ -38,7 +38,7 @@ public interface InterfaceFacebookDAO {
     
     /***** ALBUM **************************************************************/
     //11 - Cadastra álbum
-    void saveAlbum(Album album, User user) throws FacebookDAOException;
+    Integer saveAlbum(Album album, User user) throws FacebookDAOException;
     //12 - Apaga álbum
     void removeAlbum(Album album) throws FacebookDAOException;
     //13 - Atualiza dados do album (id não é atualizado)
@@ -57,7 +57,7 @@ public interface InterfaceFacebookDAO {
     
     /***** PHOTO **************************************************************/
     //19 - Cadastra photo
-    void savePhoto(Photo photo, Album album) throws FacebookDAOException;
+    Integer savePhoto(Photo photo, Album album) throws FacebookDAOException;
     //20 - Apaga photo
     void removePhoto(Photo photo) throws FacebookDAOException;
     //21 - Atualiza dados da foto (id não é atualizado)

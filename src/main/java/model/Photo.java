@@ -26,6 +26,10 @@ public class Photo implements Comparable<Photo>{
         this.id = id;
         this.path = path;
     }
+    
+    public Photo(String path) {
+        this.path = path;
+    }
 
     @Override
     public String toString() {
