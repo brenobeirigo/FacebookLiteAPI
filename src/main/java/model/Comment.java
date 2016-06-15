@@ -30,6 +30,10 @@ public class Comment {
         this.commentator = commentator;
     }
     
+    public Comment(int id){
+        this.id = id;
+    }
+    
     public int getId() {
         return id;
     }

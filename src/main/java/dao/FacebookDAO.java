@@ -987,7 +987,7 @@ public class FacebookDAO implements InterfaceFacebookDAO {
                 Calendar creation = Calendar.getInstance();
                 creation.setTimeInMillis(rs.getTimestamp("commentTime").getTime());
                 User commentator = getUserById(rs.getInt("idCommentatorUser"));
-                PostComment c = new PostComment(rs.getInt(1), rs.getString(4), new User(commentator.getId(), commentator.getName(), new Photo(commentator.getProfilePhoto().getId(), commentator.getProfilePhoto().getPath())), creation, post);
+                PostComment c = new PostComment(rs.getInt(1), rs.getString(4), new User(commentator.getId()), creation, post); //new Photo(commentator.getProfilePhoto().getId(), commentator.getProfilePhoto().getPath()) , commentator.getName()
                 l.add(c);
             }
 

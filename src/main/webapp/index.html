@@ -11,6 +11,26 @@ and open the template in the editor.
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <div>Servidor em execução...</div>
+        <form method="post" action="facebook/updateAlbum/">
+            Query updateAlbum - Id do Álbum: <input type="text" name="idAlbum"> - Nome do Álbum: <input type="text" name="name">
+            <input type="submit" value="Enviar!"><br>
+        </form><br>
+        <form method="post" action="facebook/removeAlbumComment/">
+            Query removeComment (Album) - Id do comentário: <input type="text" name="idAlbumComment">
+            <input type="submit" value="Enviar!"><br>
+        </form>
+            <form method="post" action="facebook/removePostComment/">
+            Query removeComment (Post) - Id do comentário: <input type="text" name="idPostComment">
+            <input type="submit" value="Enviar!"><br>
+        </form>
+            <form method="post" action="facebook/removePhotoComment/">
+            Query removeComment (Foto) - Id do comentário: <input type="text" name="idPhotoComment">
+            <input type="submit" value="Enviar!"><br>
+        </form>
+        <br>
+        <a href="facebook/album/1">getAlbumById</a> (IdAlbum = 1)<br>
+        <a href="facebook/users/1/albuns">getAllAlbunsOfUser</a> (IdUser = 1)<br>
+        <a href="facebook/posts/1/comments">getAllCommentsOfPost</a> (IdPost = 1)<br>
+
     </body>
 </html>

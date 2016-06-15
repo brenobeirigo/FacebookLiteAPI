@@ -19,4 +19,8 @@ public class AlbumComment extends Comment{
         super(id, content, commentator, timestamp);
         this.album = album;
     }
+
+    public AlbumComment(int id) {
+        super(id);
+    }
 }

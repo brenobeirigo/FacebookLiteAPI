@@ -16,6 +16,7 @@ public class Photo implements Comparable<Photo>{
     private int id;
     private String path;
     private Calendar uploadTime;
+    
     public Photo(int id, String path, Calendar uploadTimestamp) {
         this.id = id;
         this.path = path;

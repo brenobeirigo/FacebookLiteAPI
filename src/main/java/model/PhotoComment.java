@@ -17,5 +17,9 @@ public class PhotoComment extends Comment{
     public PhotoComment(int id, User commentator, String content, Calendar timestamp, Photo photo) {
         super(id, content, commentator, timestamp);
         this.photo = photo;
-    }   
+    }  
+    
+    public PhotoComment(int id){
+        super(id);
+    }
 }

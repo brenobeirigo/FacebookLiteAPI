@@ -14,6 +14,10 @@ import java.util.List;
  */
 public class PostComment extends Comment{
     private Post post;
+    
+    public PostComment(int id){
+        super(id);
+    }
 
     public PostComment(Post post, User commentator, String content) {
         super(commentator, content);

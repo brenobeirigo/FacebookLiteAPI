@@ -41,12 +41,17 @@ public interface InterfaceFacebookDAO {
     Integer saveAlbum(Album album, User user) throws FacebookDAOException;
     //12 - Apaga álbum
     void removeAlbum(Album album) throws FacebookDAOException;
+    
+    
     //13 - Atualiza dados do album (id não é atualizado)
     void updateAlbum(Album album) throws FacebookDAOException;
     //14 - Retorna todos os albuns do usuário user
     List<Album> getAllAlbunsOfUser(User user, int offset, int limit) throws FacebookDAOException;
     //15 - Retorna o álbum de id = idAlbum
     Album getAlbumById(int idAlbum) throws FacebookDAOException;
+   
+    
+    
     //16 - Usuário curte álbum
     void addLikeInAlbum(User user, Album album) throws FacebookDAOException;
     //17 - Usuário "descurte" álbum
@@ -86,12 +91,23 @@ public interface InterfaceFacebookDAO {
     Integer saveComment(Comment comment, Photo photo) throws FacebookDAOException;
     //27C - Cadastra comentário em post
     Integer saveComment(Comment comment, Post post) throws FacebookDAOException;
+    
+    
+    
     //28 - Apaga comentário
     void removeComment(Comment comment) throws FacebookDAOException;
+    
+    
+    
     //29 - Atualiza dados do comentário (id não é atualizado)
     void updateComment(Comment comment) throws FacebookDAOException;
+    
+    
     //30 - Retorna todos os comentários de um post (PostComment) ordenados pelo número de curtidas
     List<Comment> getAllCommentsOfPost(Post post, int offset, int limit) throws FacebookDAOException;
+    
+    
+    
     //31 - Retorna todos os comentários de uma foto (PhotoComment) ordenados pelo número de curtidas
     List<Comment> getAllCommentsOfPhoto(Photo photo, int offset, int limit) throws FacebookDAOException;
     //32 - Retorna todos os comentários de um álbum (AlbumComment) ordenados pelo número de curtidas

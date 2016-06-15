@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Base64;
+//import java.util.Base64;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -31,9 +31,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.Album;
+import model.AlbumComment;
 import model.Comment;
 import model.Photo;
+import model.PhotoComment;
 import model.Post;
+import model.PostComment;
 import model.User;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -49,13 +52,13 @@ import org.apache.commons.io.IOUtils;
 
 public class FacebookServlet extends HttpServlet {
 
-    public boolean saveFileEconded(String encodedPath, String path) throws FileNotFoundException, IOException {
+ /*   public boolean saveFileEconded(String encodedPath, String path) throws FileNotFoundException, IOException {
         byte[] decoded = Base64.getMimeDecoder().decode(encodedPath);
         FileOutputStream fos = new FileOutputStream(path);
         fos.write(decoded);
         return true;
     }
-
+*/
     public boolean doFilePost64(HttpServletRequest request) throws FacebookDAOException {
         System.out.println("Do file post 45");
         if (request.getContentType() == null) {
@@ -101,7 +104,7 @@ public class FacebookServlet extends HttpServlet {
                 String coverPath = cadastrado.getCoverPhoto().getPath();
                 String profilePath = cadastrado.getProfilePhoto().getPath();
                 System.out.println(coverPath);
-                if (saveFileEconded(URLDecoder.decode(cover, "UTF-8"), coverPath)) {
+/*                if (saveFileEconded(URLDecoder.decode(cover, "UTF-8"), coverPath)) {
                     System.out.println("ENCODE COVER!!!");
                 } else {
                     System.out.println("NO ENCODE COVER!!!");
@@ -110,7 +113,7 @@ public class FacebookServlet extends HttpServlet {
                     System.out.println("ENCODE PROFILE!!!");
                 } else {
                     System.out.println("NO ENCODE PROFILE!!!");
-                }
+                }*/
             } else {
                 System.out.println("Não achou!");
             }
@@ -191,12 +194,35 @@ public class FacebookServlet extends HttpServlet {
         private static final Pattern regexLikesOfPost = Pattern.compile("/posts/([0-9]*)/likes");
         private static final Pattern regexCountLikesOfPost = Pattern.compile("/posts/([0-9]*)/likes/count");
         private static final Pattern regexStartFriendship = Pattern.compile("/users/friends");
+        private static final Pattern regexAlbumId = Pattern.compile("/album/([0-9]*)");
         
         private static final Pattern regexPOSTLogin = Pattern.compile("/login");
         private static final Pattern regexPOSTPhoto = Pattern.compile("/photos");
         private static final Pattern regexPOSTRegister = Pattern.compile("/register");
-        private static final Pattern regexPOSTComment = Pattern.compile("/comments");
-
+        private static final Pattern regexPOSTComment = Pattern.compile("/comments");        
+        private static final Pattern regexRemoveAlbumComment = Pattern.compile("/removeAlbumComment");
+        private static final Pattern regexRemovePhotoComment = Pattern.compile("/removePhotoComment");
+        private static final Pattern regexRemovePostComment = Pattern.compile("/removePostComment");
+        private static final Pattern regexUpdateAlbum = Pattern.compile("/updateAlbum");
+        
+       
+        public static Integer MatchAlbumId(String requestUri) throws ServletException {
+            Matcher matcher = regexAlbumId.matcher(requestUri);
+            System.out.println(matcher);
+            if (matcher.find() && matcher.groupCount() > 0) {
+                System.out.println("ALBUM - END:" + matcher.end() + " -- REQ:" + (requestUri.length()));
+                if (matcher.end() == requestUri.length()) {
+                    String s = matcher.group(1);
+                    if (s != null && s.trim().length() > 0) {
+                        int id = Integer.parseInt(s);
+                        return id;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        
         public static Integer MatchPostIdComments(String requestUri) throws ServletException {
             Matcher matcher = regexPostIdComments.matcher(requestUri);
             System.out.println(matcher);
@@ -398,6 +424,7 @@ public class FacebookServlet extends HttpServlet {
         Integer idPostComments = RegexUtil.MatchPostIdComments(requestUri);
         Integer idPostLikes = RegexUtil.MatchLikesOfPost(requestUri);
         Integer idPostCountLikes = RegexUtil.MatchCountLikesOfPost(requestUri);
+        Integer idAlbum = RegexUtil.MatchAlbumId(requestUri);
 
         System.out.println("idPostsOfFriends:" + idUserPostsOfFriends + " -- UserId:" + idUser + " -- userName:" + userName + " -- friendOfUser:" + idUserFriends + " -- userOfPost:" + userName + " -- userOfPost:" + idUserPosts + " -- idUserAlbuns:" + idUserAlbuns + " -- idUserPhotos:" + idUserPhotos + " -- idPostComments:" + idPostComments);
         System.out.println("Friends of user:" + idUserFriends);
@@ -424,7 +451,20 @@ public class FacebookServlet extends HttpServlet {
                 throw new ServletException("Impossível encontrar resultados com para \"" + userName + "\"!", ex);
             }
 
-        } else if (idUserFriends != null) {
+        }else if(idAlbum!=null){
+            try {
+                Album a = dao.getAlbumById(idAlbum);
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String json = gson.toJson(a);
+                System.out.println("RESULTADO BUSCA:" + a);
+                ServletUtil.writeJSON(response, json);
+                System.out.println(a);
+            } catch (FacebookDAOException ex) {
+                throw new ServletException("Impossível encontrar resultados com para o album \"" + idAlbum + "\"!", ex);
+            }
+            
+        }
+        else if (idUserFriends != null) {
             try {
                 List<User> users = dao.getFriendsOfUser(new User(idUserFriends, null, null, null), 0, 100);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -557,6 +597,54 @@ public class FacebookServlet extends HttpServlet {
         } else if (RegexUtil.regexPOSTRegister.matcher(requestUri).find()) {
               //File post de formulário
                 doFilePost(request);
+        } else if (RegexUtil.regexUpdateAlbum.matcher(requestUri).find()) {
+            // Exemplo http://localhost:8080/FacebookLiteAPI/facebook/updateAlbum?idAlbum=3&name=familias
+            System.out.println("UPDATE ALBUM");
+            int idAlbum=0;
+            String name = "";
+            try {
+                idAlbum = Integer.parseInt(request.getParameter("idAlbum"));
+                name = request.getParameter("name");
+                Album a = new Album(idAlbum);
+                a.setName(name);
+                FacebookDAO dao = new FacebookDAO(servletAddress);                
+                dao.updateAlbum(a);
+            } catch (FacebookDAOException ex) {
+                System.out.println("Erro ao remover comentário de id: " +idAlbum);
+            }
+        }else if (RegexUtil.regexRemoveAlbumComment.matcher(requestUri).find()) {
+            System.out.println("REMOVE COMMENT");
+            int idComment=0;
+            try {
+                idComment = Integer.parseInt(request.getParameter("idAlbumComment"));
+                AlbumComment c = new AlbumComment(idComment);
+                FacebookDAO dao = new FacebookDAO(servletAddress);                
+                dao.removeComment(c);
+            } catch (FacebookDAOException ex) {
+                System.out.println("Erro ao remover comentário de id: " +idComment);
+            }
+        }else if (RegexUtil.regexRemovePostComment.matcher(requestUri).find()) {
+            System.out.println("REMOVE COMMENT");
+            int idComment=0;
+            try {
+                idComment = Integer.parseInt(request.getParameter("idPostComment"));
+                PostComment c = new PostComment(idComment);
+                FacebookDAO dao = new FacebookDAO(servletAddress);                
+                dao.removeComment(c);
+            } catch (FacebookDAOException ex) {
+                System.out.println("Erro ao remover comentário de id: " +idComment);
+            }
+        }else if (RegexUtil.regexRemovePhotoComment.matcher(requestUri).find()) {
+            System.out.println("REMOVE COMMENT");
+            int idComment=0;
+            try {
+                idComment = Integer.parseInt(request.getParameter("idPhotoComment"));
+                PhotoComment c = new PhotoComment(idComment);
+                FacebookDAO dao = new FacebookDAO(servletAddress);                
+                dao.removeComment(c);
+            } catch (FacebookDAOException ex) {
+                System.out.println("Erro ao remover comentário de id: " +idComment);
+            }
         } else if (RegexUtil.regexUserLikesPost.matcher(requestUri).find()) {
             //EXEMPLO: http://localhost:8080/WebServiceFacebook/facebook/likes?user=1&post=2
             User u = new User(Integer.valueOf(request.getParameter("user")));
