@@ -192,11 +192,35 @@ public class FacebookServlet extends HttpServlet {
         private static final Pattern regexCountLikesOfPost = Pattern.compile("/posts/([0-9]*)/likes/count");
         private static final Pattern regexStartFriendship = Pattern.compile("/users/friends");
         
+        
+        
+        private static final Pattern regexPOSTUserLikesAlbum = Pattern.compile("/albuns/likes");
+        private static final Pattern regexPOSTUserDislikesAlbum = Pattern.compile("/albuns/dilikes");
+        private static final Pattern regexListUserLikesAlbum = Pattern.compile("/albuns/([0-9]*)/likes");
+        
+        
         private static final Pattern regexPOSTLogin = Pattern.compile("/login");
         private static final Pattern regexPOSTPhoto = Pattern.compile("/photos");
         private static final Pattern regexPOSTRegister = Pattern.compile("/register");
         private static final Pattern regexPOSTComment = Pattern.compile("/comments");
 
+       
+        public static Integer MatchListUserLikesAlbum(String requestUri) throws ServletException {
+            Matcher matcher = regexListUserLikesAlbum.matcher(requestUri);
+            System.out.println(matcher);
+            if (matcher.find() && matcher.groupCount() > 0) {
+                System.out.println("ALBUMID - END:" + matcher.end() + " -- REQ:" + (requestUri.length()));
+                if (matcher.end() == requestUri.length()) {
+                    String s = matcher.group(1);
+                    if (s != null && s.trim().length() > 0) {
+                        int idalbum = Integer.parseInt(s);
+                        return idalbum;
+                    }
+                }
+            }
+            return null;
+        }
+        
         public static Integer MatchPostIdComments(String requestUri) throws ServletException {
             Matcher matcher = regexPostIdComments.matcher(requestUri);
             System.out.println(matcher);
@@ -399,6 +423,8 @@ public class FacebookServlet extends HttpServlet {
         Integer idPostLikes = RegexUtil.MatchLikesOfPost(requestUri);
         Integer idPostCountLikes = RegexUtil.MatchCountLikesOfPost(requestUri);
 
+        Integer idAlbum = RegexUtil.MatchListUserLikesAlbum(requestUri);
+        
         System.out.println("idPostsOfFriends:" + idUserPostsOfFriends + " -- UserId:" + idUser + " -- userName:" + userName + " -- friendOfUser:" + idUserFriends + " -- userOfPost:" + userName + " -- userOfPost:" + idUserPosts + " -- idUserAlbuns:" + idUserAlbuns + " -- idUserPhotos:" + idUserPhotos + " -- idPostComments:" + idPostComments);
         System.out.println("Friends of user:" + idUserFriends);
         if (idUser != null) {
@@ -412,7 +438,20 @@ public class FacebookServlet extends HttpServlet {
             } catch (FacebookDAOException ex) {
                 throw new ServletException("Impossível encontrar usuário com id = " + idUser + "!", ex);
             }
-        } else if (userName != null) {
+        }
+        else if(idAlbum != null){
+            try {
+                List<User> u = dao.getListOfLikesAlbum(dao.getAlbumById(idAlbum));
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String json = gson.toJson(u);
+                System.out.println("RESULTADO BUSCA:" + u);
+                ServletUtil.writeJSON(response, json);
+                System.out.println("Users:" + u);
+            } catch (FacebookDAOException ex) {
+                throw new ServletException("Impossível encontrar album com id = " + idAlbum + "!", ex);
+            }
+            
+        }else if (userName != null) {
             try {
                 List<User> u = dao.searchUsersByName(userName, offset, limit);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -570,7 +609,37 @@ public class FacebookServlet extends HttpServlet {
                 System.out.println("Erro login!" + ex.getMessage());;
             }
             System.out.println("POST LOGIN!");
-        } else if (RegexUtil.regexStartFriendship.matcher(requestUri).find()) {
+        } 
+
+        //Vinícius
+        else if (RegexUtil.regexPOSTUserLikesAlbum.matcher(requestUri).find()){
+          //EXEMPLO: http://localhost:8080/WebServiceFacebook/facebook/likes?user=1&album=2
+            User u = new User(Integer.valueOf(request.getParameter("user")));
+            Album a = new Album(Integer.valueOf(request.getParameter("album")));
+            System.out.println("Like:" + u + "--" + a);
+            FacebookDAO dao = new FacebookDAO(servletAddress);
+            try {
+                dao.addLikeInAlbum(u, a);
+                response.getWriter().write("LIKE");
+            } catch (FacebookDAOException ex) {
+                System.out.println("Erro Like!" + ex.getMessage());;
+            }
+            
+            }else if (RegexUtil.regexPOSTUserDislikesAlbum.matcher(requestUri).find()){
+          //EXEMPLO: http://localhost:8080/WebServiceFacebook/facebook/likes?user=1&album=2
+            User u = new User(Integer.valueOf(request.getParameter("user")));
+            Album a = new Album(Integer.valueOf(request.getParameter("album")));
+            System.out.println("Dislike:" + u + "--" + a);
+            FacebookDAO dao = new FacebookDAO(servletAddress);
+            try {
+                dao.removeLikeInAlbum(u, a);
+                response.getWriter().write("DISLIKE");
+            } catch (FacebookDAOException ex) {
+                System.out.println("Erro Dislike!" + ex.getMessage());;
+            }} //Vinícius
+            
+            
+            else if (RegexUtil.regexStartFriendship.matcher(requestUri).find()) {
             //EXEMPLO: http://localhost:8080/WebServiceFacebook/facebook/likes?user=1&post=2
             User u1 = new User(Integer.valueOf(request.getParameter("user1")));
             User u2 = new User(Integer.valueOf(request.getParameter("user2")));
