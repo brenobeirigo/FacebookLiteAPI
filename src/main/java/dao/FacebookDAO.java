@@ -165,7 +165,7 @@ public class FacebookDAO implements InterfaceFacebookDAO {
             ps.setString(2, user.getEmail());
             Calendar c = Calendar.getInstance();
             //Armazena data
-            c = user.getDateOfBirth();
+            //c = user.getDateOfBirth();
             //Altera statement
             ps.setDate(3, new java.sql.Date(c.getTimeInMillis()));
             ps.setInt(4, user.getId());

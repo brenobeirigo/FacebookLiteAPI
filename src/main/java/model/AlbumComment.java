@@ -14,9 +14,14 @@ import java.util.List;
  */
 public class AlbumComment extends Comment{
     Album album;
+    
+    public AlbumComment(int id){
+        super(id);
+    }
 
     public AlbumComment(int id, String content, User commentator, Calendar timestamp, Album album) {
         super(id, content, commentator, timestamp);
         this.album = album;
     }
+    
 }

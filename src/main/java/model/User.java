@@ -25,8 +25,6 @@ public class User {
         return "User{" + "id=" + id + ", name=" + name + ", email=" + email + ", dateOfBirth=" + dateOfBirth + ", profilePhoto=" + profilePhoto + ", coverPhoto=" + coverPhoto + '}';
     }
     
-
-    
     public User(int id) {
     this.id = id;
     }
@@ -36,6 +34,12 @@ public class User {
         this.name = name;
         this.profilePhoto = profilePhoto;
         this.coverPhoto = coverPhoto;
+    }
+    
+    public User(int id, String name, String email) {
+        this.name = name;
+        this.email = email;
+        this.id = id;
     }
 
     public User(String name, String email, Calendar dateOfBirth) {

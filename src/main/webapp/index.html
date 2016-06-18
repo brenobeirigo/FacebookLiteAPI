@@ -6,11 +6,50 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>TODO supply a title</title>
+        <title>Facebook</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <div>Servidor em execução...</div>
+        <div>Servidor em execução... ALELUIA</div>
+        <h1>Facebook</h1>
+        
+        <form method="post" action="facebook/removeUser">
+            2)Query removeUser
+            <p><br>Remover Usuário -> Id do Usuário: <input type="number" name="idUser">
+            <input type="submit" value="Enviar"><br></p>
+        </form><br>
+        
+        <form method="post" action="facebook/updateUser">
+            3)Query updateUser: 
+            <p><br>Atualiza Usuário -> Id do Usuário: <input type="number" name="idUser"> - Nome do Usuário: <input type="text" name="name" > - Email do Usuário: <input type="text" name="email" >
+            <input type="submit" value="Enviar"><br></p>
+        </form><br>
+        
+        33)Query getCommentById
+        <br><a href="facebook/postComment/2"> Retorna comentário do post de Id = 2</a>
+        <br><a href="facebook/albumComment/1"> Retorna comentário do álbum de Id = 1</a>
+        <br><a href="facebook/photoComment/6"> Retorna comentário da foto de Id = 6</a><br><br>
+        
+        <form method="post" action="facebook/removeLikes/albumComment">
+            35)Query removeLikeInComment:
+            <br><br>AlbumComment -> Id do Usuário: <input type="number" name="user"> - Id do Comentário no Álbum: <input type="number" name="albumcomment" >  
+            <input type="submit" value="Enviar">
+        </form><br>
+        
+        <form method="post" action="facebook/removeLikes/photoComment">
+            PhotoComment -> Id do Usuário: <input type="number" name="user"> - Id do Comentário na Foto:  <input type="number" name="photocomment" >  
+            <input type="submit" value="Enviar">
+        </form><br>
+        
+        <form method="post" action="facebook/removeLikes/postComment">
+            PostComment  -> Id do Usuário: <input type="number" name="user"> - Id do Comentário no Post:  <input type="number" name="postcomment"  > 
+            <input type="submit" value="Enviar">
+        </form><br>
+        
+        36)Query getListOfLikesComment
+        <br><a href="facebook/albumComment/2/likes"> Retorna a lista de usuários que curtiram o comentário do álbum de Id = 2</a>
+        <br><a href="facebook/photoComment/4/likes"> Retorna a lista de usuários que curtiram o comentário da foto de Id = 4</a>
+        <br><a href="facebook/postComment/2/likes"> Retorna a lista de usuários que curtiram o comentário do post de Id = 2</a><br><br>
     </body>
 </html>

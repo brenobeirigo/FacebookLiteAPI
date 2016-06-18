@@ -18,6 +18,10 @@ public class Comment {
     private User commentator;
     private Calendar timeComment;
 
+    public Comment(int id) {
+        this.id = id;
+    }
+    
     public Comment(int id, String content, User commentator, Calendar timestamp) {
         this.id = id;
         this.content = content;
