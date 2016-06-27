@@ -38,6 +38,7 @@ import model.PhotoComment;
 import model.Post;
 import model.PostComment;
 import model.User;
+import model.logica.Logica;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -51,6 +52,26 @@ import org.apache.commons.io.IOUtils;
 @WebServlet(name = "FacebookServlet", urlPatterns = {"/facebook/*"})
 
 public class FacebookServlet extends HttpServlet {
+    
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //Codificação correta
+        request.setCharacterEncoding("utf-8");
+        //Qual é a lógica?
+        String parametro = request.getParameter("logica");
+        //Todas as lógicas estão no pacote model.logica
+        String nomeDaClasse = "model.logica." + parametro;
+        try {
+            Class<?> classe = Class.forName(nomeDaClasse);    
+            Logica logica = (Logica) classe.newInstance();
+            // Recebe o String após a execução da lógica
+            String pagina = logica.executa(request, response);
+            // Faz o forward para a página JSP
+            request.getRequestDispatcher(pagina).forward(request, response);
+        } catch (Exception e) {
+            throw new ServletException("A lógica de negócios causou uma exceção", e);
+        }
+
+    }
 
  /*   public boolean saveFileEconded(String encodedPath, String path) throws FileNotFoundException, IOException {
         byte[] decoded = Base64.getMimeDecoder().decode(encodedPath);
@@ -58,7 +79,7 @@ public class FacebookServlet extends HttpServlet {
         fos.write(decoded);
         return true;
     }
-*/
+
     public boolean doFilePost64(HttpServletRequest request) throws FacebookDAOException {
         System.out.println("Do file post 45");
         if (request.getContentType() == null) {
@@ -104,7 +125,7 @@ public class FacebookServlet extends HttpServlet {
                 String coverPath = cadastrado.getCoverPhoto().getPath();
                 String profilePath = cadastrado.getProfilePhoto().getPath();
                 System.out.println(coverPath);
-/*                if (saveFileEconded(URLDecoder.decode(cover, "UTF-8"), coverPath)) {
+                if (saveFileEconded(URLDecoder.decode(cover, "UTF-8"), coverPath)) {
                     System.out.println("ENCODE COVER!!!");
                 } else {
                     System.out.println("NO ENCODE COVER!!!");
@@ -113,7 +134,7 @@ public class FacebookServlet extends HttpServlet {
                     System.out.println("ENCODE PROFILE!!!");
                 } else {
                     System.out.println("NO ENCODE PROFILE!!!");
-                }*/
+                }
             } else {
                 System.out.println("Não achou!");
             }
@@ -383,7 +404,7 @@ public class FacebookServlet extends HttpServlet {
             return null;
         }
 
-    }
+    }*/
 
 // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -397,7 +418,8 @@ public class FacebookServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Integer offset = 0, limit = Integer.MAX_VALUE;
+        processRequest(request, response);
+        /*Integer offset = 0, limit = Integer.MAX_VALUE;
         if (request.getParameterMap().containsKey("offset")) {
             offset = Integer.valueOf(request.getParameter("offset"));
         }
@@ -554,7 +576,7 @@ public class FacebookServlet extends HttpServlet {
             } catch (FacebookDAOException ex) {
                 Logger.getLogger(FacebookServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
+        }*/
     }
 
     /**
@@ -568,7 +590,8 @@ public class FacebookServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("POST POST!!!!!!!!!!!!!!");
+        processRequest(request, response);
+        /*System.out.println("POST POST!!!!!!!!!!!!!!");
         String requestUri = request.getRequestURI();
         String servletAddress = "http://" + request.getServerName() + ":" + request.getServerPort() + "/WebServiceFacebook/";
         System.out.println("ADD:" + servletAddress);
@@ -688,7 +711,7 @@ public class FacebookServlet extends HttpServlet {
                 System.out.println("Impossível salvar post!" + ex.getMessage());;
             }
             System.out.println("POST LOGIN!");
-        }
+        }*/
     }
 
     /**

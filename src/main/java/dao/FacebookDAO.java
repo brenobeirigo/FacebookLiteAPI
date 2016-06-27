@@ -1089,7 +1089,7 @@ public class FacebookDAO implements InterfaceFacebookDAO {
 
                     while (rs.next()) {
                         User u = null;//getUserById(rs.getInt("idCommentatorUser"));
-                        Post post = null;//getPostById(rs.getInt("idPost"));
+                        Post post = getPostById(rs.getInt("idPost"));
                         p = new PostComment(rs.getInt("idPostComment"), rs.getString("content"), u, null, post);
                     }
                     pstm.close();

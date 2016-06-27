@@ -34,5 +34,13 @@ public class PostComment extends Comment{
     public String toString() {
         return "PostComment{" +super.toString()+ "post=" + post + '}';
     }
+
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
+    }
     
 }
