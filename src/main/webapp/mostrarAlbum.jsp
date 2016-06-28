@@ -16,7 +16,7 @@
         <%
             Album album = (Album)request.getAttribute("Album");
         %>
-        <table border="l" cellpadding="0" cellspacing="0">
+        <table border="1" cellpadding="0" cellspacing="0">
             <tr>
                 <th>id_Album</th>
                 <th>Nome</th>
