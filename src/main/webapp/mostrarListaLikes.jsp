@@ -19,6 +19,7 @@
             <tr>
                 <th>User_id</th>
                 <th>User_name</th>
+                <th>Deslike</th>
                 <th></th>
             </tr>
             <%
@@ -28,6 +29,10 @@
             <tr>
                 <td><%= users.get(i).getId() %></td>
                 <td> <%= users.get(i).getName() %></td>
+                <td> <a href="facebook?logica=RemoveLikeAlbum=<%=users.get(i).getId()%>">
+                        Deslike
+                    </a>
+                </td>
             </tr>
             <%
                 }
