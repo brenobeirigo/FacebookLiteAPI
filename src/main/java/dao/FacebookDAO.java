@@ -55,18 +55,18 @@ public class FacebookDAO implements InterfaceFacebookDAO {
     public FacebookDAO(String servletAddress) {
         this.server = "localhost";
         this.port = "3306";
-        this.db = "facebookdb";
+        this.db = "mydb";
         this.user = "root";
-        this.password = "123456";
+        this.password = "elias";
         this.servletAddress = servletAddress;
     }
     
     public FacebookDAO() {
         this.server = "localhost";
         this.port = "3306";
-        this.db = "facebookdb";
+        this.db = "mydb";
         this.user = "root";
-        this.password = "123456";
+        this.password = "elias";
     }
 
     @Override
