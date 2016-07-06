@@ -30,7 +30,7 @@
                 <td><%= users.get(i).getId() %></td>
                 <td> <%= users.get(i).getName() %></td>
                 <td> <a href="facebook?logica=removeComment&idComment=<%=users.get(i).getId()%>">
-                        Excluir
+                        Deslike
                     </a>
                 </td>
             </tr>
