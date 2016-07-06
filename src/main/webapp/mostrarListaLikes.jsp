@@ -17,6 +17,7 @@
     <body>
         <table border="1" cellpadding="0" cellspacing="0">
             <tr>
+                <th>Album_id</th>
                 <th>User_id</th>
                 <th>User_name</th>
                 <th>Deslike</th>
@@ -27,6 +28,7 @@
                 for(int i=0; i<users.size(); i++){
             %>
             <tr>
+                <td><%= request.getAttribute("idAlbum") %></td>
                 <td><%= users.get(i).getId() %></td>
                 <td> <%= users.get(i).getName() %></td>
                 <td> <a href="facebook?logica=RemoveLikeAlbum&idUser=<%=users.get(i).getId()%>&idAlbum=<%=request.getAttribute("idAlbum")%>">
