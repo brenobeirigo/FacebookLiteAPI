@@ -17,9 +17,9 @@
     <body>
         <table border="1" cellpadding="0" cellspacing="0">
             <tr>
-                <th>id_AlbumLike</th>
-                <th>Like</th>
-                <th>id_User</th>
+                <th>User_id</th>
+                <th>User_name</th>
+                <th>Deslike</th>
                 <th></th>
             </tr>
             <%
