@@ -25,6 +25,7 @@ public class getListOfLikesAlbum implements Logica{
             
         List likesAlbum = dao.getListOfLikesAlbum(album);
         request.setAttribute("listaLikes", likesAlbum);
+        request.setAttribute("idAlbum", id_Album);
         return "mostrarListaLikes.jsp";
     }
     

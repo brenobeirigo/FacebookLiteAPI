@@ -29,7 +29,7 @@
             <tr>
                 <td><%= users.get(i).getId() %></td>
                 <td> <%= users.get(i).getName() %></td>
-                <td> <a href="facebook?logica=RemoveLikeAlbum=<%=users.get(i).getId()%>">
+                <td> <a href="facebook?logica=RemoveLikeAlbum&idUser=<%=users.get(i).getId()%>&idAlbum=<%=request.getAttribute("idAlbum")%>">
                         Deslike
                     </a>
                 </td>
