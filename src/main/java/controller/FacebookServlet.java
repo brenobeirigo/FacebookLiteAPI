@@ -177,7 +177,16 @@ public class FacebookServlet extends HttpServlet {
     }
 
     private static class RegexUtil {
-
+         private static final Pattern regexLikeCommentsOfUser = Pattern.compile("/users/([0-9]*)/likes/comments");
+        //Retorna a lista de likes em albuns de um usuÃ¡rio @MatheusDelgado
+        private static final Pattern regexLikeAlbunsOfUser = Pattern.compile("/users/([0-9]*)/likes/albuns");
+        //Retorna a lista de likes em fotos de um usuÃ¡rio @MatheusDelgado
+        private static final Pattern regexLikePhotosOfUser = Pattern.compile("/users/([0-9]*)/likes/photos");
+        //Retorna os posts feitos por amigos de um usuÃ¡rio @IagoMorais
+        private static final Pattern regexAllFriendsPostsOfUser = Pattern.compile("/users/([0-9]*)/friends/posts");
+        //Retorna todos os cometÃ¡rios de uma foto @IagoMorais 
+        private static final Pattern regexAllCommentsOfPhoto = Pattern.compile("/user/photo/([0-9]*)/comments");
+        
         //http://www.restapitutorial.com/lessons/restfulresourcenaming.html
         private static final Pattern regexUserId = Pattern.compile("/users/([0-9]*)");
         private static final Pattern regexUserName = Pattern.compile("/user/name/([a-zA-Z 0-9]*)");
@@ -228,6 +237,96 @@ public class FacebookServlet extends HttpServlet {
             }
             return null;
         }
+//@MatheusDelgado
+        public static Integer MatchLikeCommentsOfUser(String requestUri) throws ServletException {
+            Matcher matcher = regexLikeCommentsOfUser.matcher(requestUri);
+            System.out.println(matcher);
+            if (matcher.find() && matcher.groupCount() > 0) {
+                System.out.println("ID - END:" + matcher.end() + " -- REQ:" + (requestUri.length()));
+                if (matcher.end() == requestUri.length()) {
+                    String s = matcher.group(1);
+                    if (s != null && s.trim().length() > 0) {
+                        int isbn = Integer.parseInt(s);
+                        return isbn;
+                    }
+                }
+            }
+            return null;
+        }
+
+        //@MatheusDelgado
+        public static Integer MatchLikeAlbunsOfUser(String requestUri) throws ServletException {
+            Matcher matcher = regexLikeAlbunsOfUser.matcher(requestUri);
+            System.out.println(matcher);
+            if (matcher.find() && matcher.groupCount() > 0) {
+                System.out.println("LIKESOFALBUNS - END:" + matcher.end() + " -- REQ:" + (requestUri.length()));
+                if (matcher.end() == requestUri.length()) {
+                    String s = matcher.group(1);
+                    if (s != null && s.trim().length() > 0) {
+                        int id = Integer.parseInt(s);
+                        return id;
+                    }
+                }
+            }
+            return null;
+        }
+        //@MatheusDelgado
+        public static Integer MatchLikePhotosOfUser(String requestUri) throws ServletException {
+            Matcher matcher = regexLikePhotosOfUser.matcher(requestUri);
+            System.out.println(matcher);
+            if (matcher.find() && matcher.groupCount() > 0) {
+                System.out.println("LIKESOFPHOTOS - END:" + matcher.end() + " -- REQ:" + (requestUri.length()));
+                if (matcher.end() == requestUri.length()) {
+                    String s = matcher.group(1);
+                    if (s != null && s.trim().length() > 0) {
+                        int id = Integer.parseInt(s);
+                        return id;
+                    }
+                }
+            }
+            return null;
+        }        
+        
+        
+        
+        //@Iagomorais 
+        public static Integer MatchPostsOfFriendsUser (String requestUri) throws ServletException {
+            Matcher matcher = regexAllFriendsPostsOfUser.matcher(requestUri);
+            System.out.println(matcher);
+            if (matcher.find() && matcher.groupCount() >0){
+                System.out.println("POSTSOFUSER -END" + matcher.end() + " -- REQ: "+ (requestUri.length()));
+                    if (matcher.end() == requestUri.length()) {
+                    String s = matcher.group(1);
+                    if (s != null && s.trim().length() > 0) {
+                        int id = Integer.parseInt(s);
+                        return id;
+                    }
+                }
+            }
+            
+            
+            return null;
+        }
+        
+        //@IagoMorais 
+        public static Integer MatchAllCommentsOfPhoto (String requestUri) throws ServletException {
+            Matcher matcher = regexAllCommentsOfPhoto.matcher(requestUri);
+            System.out.println(matcher);
+                 if (matcher.find() && matcher.groupCount() >0){
+                System.out.println("COMMENTSOFPHOTO -END" + matcher.end() + " -- REQ: "+ (requestUri.length()));
+                    if (matcher.end() == requestUri.length()) {
+                    String s = matcher.group(1);
+                    if (s != null && s.trim().length() > 0) {
+                        int id = Integer.parseInt(s);
+                        return id;
+                    }
+                }
+            }
+            
+            return null;
+
+        }
+
 
         public static Integer MatchLikesOfPost(String requestUri) throws ServletException {
             Matcher matcher = regexLikesOfPost.matcher(requestUri);
@@ -398,6 +497,14 @@ public class FacebookServlet extends HttpServlet {
         Integer idPostComments = RegexUtil.MatchPostIdComments(requestUri);
         Integer idPostLikes = RegexUtil.MatchLikesOfPost(requestUri);
         Integer idPostCountLikes = RegexUtil.MatchCountLikesOfPost(requestUri);
+        Integer idUserLikesComment = RegexUtil.MatchLikeCommentsOfUser(requestUri);
+        Integer idUserLikesAlbum = RegexUtil.MatchLikeAlbunsOfUser(requestUri);
+        Integer idUserLikesPhoto = RegexUtil.MatchLikePhotosOfUser(requestUri);
+        //@IagoMorais
+        Integer idUserFriendsPosts = RegexUtil.MatchLikePhotosOfUser(requestUri);
+        //@IagoMorais
+        Integer idPhotoToGetComments = RegexUtil.MatchLikePhotosOfUser(requestUri);
+     
 
         System.out.println("idPostsOfFriends:" + idUserPostsOfFriends + " -- UserId:" + idUser + " -- userName:" + userName + " -- friendOfUser:" + idUserFriends + " -- userOfPost:" + userName + " -- userOfPost:" + idUserPosts + " -- idUserAlbuns:" + idUserAlbuns + " -- idUserPhotos:" + idUserPhotos + " -- idPostComments:" + idPostComments);
         System.out.println("Friends of user:" + idUserFriends);
@@ -458,8 +565,77 @@ public class FacebookServlet extends HttpServlet {
                 ServletUtil.writeJSON(response, json);
             } catch (FacebookDAOException ex) {
                 Logger.getLogger(FacebookServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }}else if (idUserLikesComment != null){
+           try{
+             User u = dao.getUserById(idUserLikesComment);
+             List<Comment> lc = dao.getLikedCommentsOfUser(u, 0, 100);
+             Gson gson = new GsonBuilder().setPrettyPrinting().create();
+             String json = gson.toJson(lc);
+             System.out.println("RESULTADO BUSCA:" + lc);
+             ServletUtil.writeJSON(response, json);
+             System.out.println(lc);
+            }catch (FacebookDAOException ex){
+               throw new ServletException("ImpossÃƒÂ­vel encontrar lista de comentÃƒÂ¡rios curtidos pelo usuÃƒÂ¡rio de id " + idUserLikesComment + ".", ex);
             }
-        } else if (idUserAlbuns != null) {
+        //@MatheusDelgado
+        }else if (idUserLikesAlbum != null){
+           try{
+             User u = dao.getUserById(idUserLikesAlbum);
+             List<Album> lc = dao.getLikedAlbunsOfUser(u, 0, 100);
+             Gson gson = new GsonBuilder().setPrettyPrinting().create();
+             String json = gson.toJson(lc);
+             System.out.println("RESULTADO BUSCA:" + lc);
+             ServletUtil.writeJSON(response, json);
+             System.out.println(lc);
+           }catch (FacebookDAOException ex){
+               throw new ServletException("ImpossÃƒÂ­vel encontrar lista de ÃƒÂ¡lbuns curtidos pelo usuÃƒÂ¡rio de id " + idUserLikesAlbum + ".", ex);
+           }
+        //@MatheusDelgado
+        }else if (idUserLikesPhoto != null){
+           try{
+             User u = dao.getUserById(idUserLikesPhoto);
+             List<Photo> lc = dao.getLikedPhotosOfUser(u, 0, 100);
+             Gson gson = new GsonBuilder().setPrettyPrinting().create();
+             String json = gson.toJson(lc);
+             System.out.println("RESULTADO BUSCA:" + lc);
+             ServletUtil.writeJSON(response, json);
+             System.out.println(lc);
+           }catch (FacebookDAOException ex){
+               throw new ServletException("ImpossÃƒÂ­vel encontrar lista de fotos curtidos pelo usuÃƒÂ¡rio de id " + idUserLikesPhoto + ".", ex);
+           } 
+           
+        //@IagoMorais 
+        }else if (idUserFriendsPosts != null){
+            try{
+                List<Post> postOfFriends;
+                postOfFriends = dao.getAllPostsOfUser(dao.getUserById(idUserFriendsPosts), offset, limit);
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String json = gson.toJson(postOfFriends);
+                for (Post p : postOfFriends) {
+                    System.out.println(p);
+                    
+                }
+                
+            }catch (FacebookDAOException ex) {
+                throw new ServletException("ImpossÃƒÂ­vel encontrar os amigos do usuÃƒÂ¡rio com id = " + idUserFriends + "!", ex);
+            }
+        //@IagoMorais 
+        }else if (idPhotoToGetComments != null) {
+            
+            try{
+                List <Comment> PhotoComments;
+                PhotoComments = dao.getAllCommentsOfPhoto(dao.getPhotoById(idPhotoToGetComments), offset, limit);
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String json = gson.toJson(PhotoComments);
+                for (Comment c : PhotoComments) {
+                System.out.println(c);
+                    
+                }
+                
+            }catch (FacebookDAOException ex) {
+                throw new ServletException("ImpossÃƒÂ­vel encontrar os amigos do usuÃƒÂ¡rio com id = " + idUserFriends + "!", ex);
+            
+        } }else if (idUserAlbuns != null) {
             try {
                 User u = new User(idUserAlbuns);
                 List<Album> albuns = dao.getAllAlbunsOfUser(u, offset, limit);
