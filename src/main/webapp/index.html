@@ -1,23 +1,34 @@
 <!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
 <html>
     <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Upload</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     </head>
-    <body>
-        OBS: No BD original, não existem curtidas em nenhum comentário, foto ou álbum. Insira algumas no BD previamente. <br><br>
-        <a href="localhost:8080/FacebookAPILite/facebook/users/3/likes/comments"> Comentários curtidos pelo usuário de ID 3 </a><br>
-        <a href="localhost:8080/FacebookAPILite/facebook/users/4/likes/comments"> Álbuns curtidos pelo usuário de ID 4 </a><br>
-        <a href="localhost:8080/FacebookAPILite/facebook/users/1/likes/comments"> Fotos Curtidas pelo usuário de ID 1 </a><br>
-        <br><br>
-        <a href="localhost:8080/FacebookAPILite/facebook/users/5/friends/posts"> Posts dos amigos do usuário de ID 5 </a><br>
-        <a href="localhost:8080/FacebookAPILite/facebook/users/5/comments"> Comentários do usuário de ID 5 </a>
-        
+    <body>json
+        <h1>comentarios curtidos por id do usuário</h1>
+        <form method="post" action="facebook?logica=getComentariosCurtidosPorId" >
+            <input type="text" name="User_id" placeholder="id do usuario"/> <br>
+            <input type="submit"  value="Enviar"/>
+        </form>
+        <h1>fotos curtidos por id do usuário</h1>
+        <form method="post" action="facebook?logica=getPhotosCurtidosPorId" >
+            <input type="text" name="User_id" placeholder="id do usuario"/> <br>
+            <input type="submit" value="Enviar"/>
+        </form>
+        <h1>albuns curtidos por id do usuário</h1>
+        <form method="post" action="facebook?logica=getAlbunsCurtidosPorId" >
+            <input type="text" name="User_id" placeholder="id do usuario"/> <br>
+            <input type="submit" value="Enviar"/>
+        </form>
+        <h1>posts dos amigos do usuario</h1>
+        <form method="post" action="facebook?logica=getAllFriendsPostsOfUser" >
+            <input type="text" name="User_id" placeholder="id do usuario"/> <br>
+            <input type="submit"  value="Enviar"/>
+        </form>
+        <h1>comentarios por id do usuário</h1>
+        <form method="post" action="facebook?logica=getCommentPorId" >
+            <input type="text" name="User_id" placeholder="id do usuario" /> <br>
+            <input type="submit" value="Enviar"/>
+        </form>
     </body>
 </html>
